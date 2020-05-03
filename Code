@@ -1,3 +1,5 @@
+#Analysis of COVID cases in India
+
 #Importing data from COVID 19 india.org
 library(jsonlite)
 dataframe <- fromJSON("https://api.covid19india.org/states_daily.json", flatten= TRUE)
@@ -84,30 +86,68 @@ plot(forecast(Selected.model),ylab="Total number of Cases", xlab="No of days sin
 library(readxl) 
 #Source: Data_international_Exposure_Weather_final.xlsx)
 
+#We have 3 variables; two variables (Cases and no. of flights) as integers and one variable (Temperature) as continuous
+#Applying different modelling techniques
 
+#Regression Tree model
+options(Scipen=10) #No scientific notation
+library(tree)
+set.seed(90)
+regression.tree.data <- read.xlsx("File location and name", col_names =TRUE)
+str(regression.tree.data)
+n.train <- round(nrow(regression.tree.data)*0.7,0)
+n.train
+regression.tree.training.sample <- sample(nrow(regression.tree.data),n.train)
+regression.tree.training.sample
+Reression.tree.training.data <- Regression.tree.data[Regression.tree.training.sample,]
+str(Reression.tree.training.data)
+regression.tree.validation.data <- regression.tree.data [-Regression.tree.training.sample,]
+str(regression.tree.validation.data)
 
+#Performing tree() on training data
+mean(Regression.tree.training.data$Cases)
 
+#Performing prediction
+library(rpart)
+library(rpart.plot)
+library(forecast)
+Cases.tree <- rpart(Cases ~., data=Regression.tree.training.data, control= rpart.control(minbucket=5))
+Cases.tree$frame
+mean(Regression.tree.training.data$Cases)
 
+#Plotting tree
+rpart.plot(Cases.tree)
 
+#Performing prediction and checking accuracy
+Regression.tree. Validation.prediction <- predict(Cases.tree, Regression.tree.validation.data)
+Regression.tree. Validation.prediction
 
+#Performing Linear regression
+library(ggplot2)
+library(corrplot)
+library(isdals)
+library("PerformanceAnalytics")
 
+#Correlation between variables and their normality
 
+correls <- cor(Regression.tree.data)
+(cor(Regression.tree.data))
+corrplot(correls,tl.srt=50, type ="lower")
+chart.Correlation(Regression.tree.data, histogram=TRUE, pch=25)
 
+#Though cases and no. of flights don't appear to be normal, still we would perform linear regression
+#For checking normality, we could perform QQ plot as well
 
+linear.regression.model <- lm(Cases~., data=Regression.tree.training.data)
+summary(linear.regression.model)
 
+#predicting and checking accuracy with the validation data
+predict.linear.Validation <- predict (linear.regression.model, Regression.tree.validation.data)
+predict.linear.Validation
+cat("Root Mean Square of Error, rpart model=", Regression.tree.Validation.prediction.accuracy[2])
+cat("Root Mean Square of Error, rpart model=", predict.linear.Validation.accuracy[2])
 
+#1st part of the study - The time series trend of the cases are shown and predictiions have been done accordingly
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+#2nd part of the study - The accuracy of the linear regression model is better than that of Regression tree model
 
